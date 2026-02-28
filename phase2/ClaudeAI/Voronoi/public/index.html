@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voronoï — Python</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;600;700&display=swap');
+
+        :root {
+          --bg: #08090d;
+          --surface: #0f1016;
+          --surface2: #16171f;
+          --border: #22232e;
+          --accent: #7c6af7;
+          --accent2: #f24e7c;
+          --green: #4ade80;
+          --yellow: #facc15;
+          --text: #e4e4ed;
+          --text2: #6b6b82;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto; /* ✅ SCROLL activé */
+        }
+
+        body::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background:
+            radial-gradient(ellipse 70% 50% at 10% 10%, rgba(124,106,247,0.1) 0%, transparent 55%),
+            radial-gradient(ellipse 60% 60% at 90% 90%, rgba(242,78,124,0.07) 0%, transparent 55%);
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        header {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 20px 36px;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+          display: flex;
+          align-items: baseline;
+          gap: 12px;
+        }
+
+        .logo-name {
+          font-size: 22px;
+          font-weight: 700;
+          letter-spacing: -0.3px;
+          background: linear-gradient(120deg, #e4e4ed 0%, #7c6af7 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .logo-lang {
+          font-family: 'Space Mono', monospace;
+          font-size: 10px;
+          color: var(--green);
+          border: 1px solid rgba(74, 222, 128, 0.3);
+          border-radius: 4px;
+          padding: 3px 8px;
+          letter-spacing: 0.08em;
+        }
+
+        .logo-sub {
+          font-family: 'Space Mono', monospace;
+          font-size: 10px;
+          color: var(--text2);
+        }
+
+        main {
+          flex: 1;
+          position: relative;
+          z-index: 1;
+          display: grid;
+          grid-template-columns: 340px 1fr;
+          min-height: calc(100vh - 65px); /* ✅ min-height au lieu de height */
+        }
+
+        /* PANEL */
+        .panel {
+          border-right: 1px solid var(--border);
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto; /* ✅ Scroll interne si besoin */
+        }
+
+        .panel-block {
+          padding: 16px; /* ✅ Réduit de 20px */
+          border-bottom: 1px solid var(--border);
+        }
+
+        .block-title {
+          font-family: 'Space Mono', monospace;
+          font-size: 9px;
+          letter-spacing: 0.14em;
+          color: var(--text2);
+          text-transform: uppercase;
+          margin-bottom: 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .block-title::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: var(--border);
+        }
+
+        /* Drop zone */
+        .dropzone {
+          border: 1.5px dashed var(--border);
+          border-radius: 8px;
+          padding: 24px 16px;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.15s;
+        }
+
+        .dropzone:hover, .dropzone.active {
+          border-color: var(--accent);
+          background: rgba(124,106,247,0.04);
+        }
+
+        .dropzone-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+        .dropzone-text { font-size: 13px; font-weight: 600; color: var(--text); }
+        .dropzone-hint { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text2); margin-top: 3px; }
+
+        input[type="file"] { display: none; }
+
+        .divider {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: 12px 0;
+          font-family: 'Space Mono', monospace;
+          font-size: 9px;
+          color: var(--text2);
+        }
+
+        .divider::before, .divider::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: var(--border);
+        }
+
+        textarea {
+          width: 100%;
+          background: var(--surface2);
+          border: 1px solid var(--border);
+          border-radius: 7px;
+          color: var(--text);
+          font-family: 'Space Mono', monospace;
+          font-size: 12px;
+          line-height: 1.75;
+          padding: 10px 12px;
+          resize: none;
+          height: 100px; /* ✅ Réduit de 130px */
+          transition: border-color 0.15s;
+        }
+
+        textarea::placeholder { color: var(--text2); }
+        textarea:focus { outline: none; border-color: var(--accent); }
+
+        .hint-text {
+          font-family: 'Space Mono', monospace;
+          font-size: 10px;
+          color: var(--text2);
+          margin-top: 8px;
+          line-height: 1.7;
+        }
+
+        .hint-text code {
+          background: var(--surface2);
+          border: 1px solid var(--border);
+          border-radius: 3px;
+          padding: 1px 4px;
+          color: var(--green);
+        }
+
+        .btn-primary {
+          width: 100%;
+          padding: 12px;
+          background: var(--accent);
+          border: none;
+          border-radius: 7px;
+          color: white;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s;
+          margin-top: 12px;
+        }
+
+        .btn-primary:hover {
+          background: #8e7ef8;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 24px rgba(124,106,247,0.35);
+        }
+
+        .btn-primary:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .btn-sm {
+          padding: 7px 14px;
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          color: var(--text);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-sm:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+
+        /* Stats */
+        .stats-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 5px; /* ✅ Réduit */
+        }
+
+        .stat {
+          background: var(--surface2);
+          border: 1px solid var(--border);
+          border-radius: 7px;
+          padding: 8px 10px; /* ✅ Réduit */
+        }
+
+        .stat-val {
+          font-family: 'Space Mono', monospace;
+          font-size: 20px;
+          font-weight: 700;
+          line-height: 1;
+          color: var(--text);
+        }
+
+        .stat-val.a { color: var(--accent); }
+        .stat-val.r { color: var(--accent2); }
+        .stat-val.g { color: var(--green); }
+
+        .stat-lbl {
+          font-size: 9px;
+          color: var(--text2);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-top: 4px;
+        }
+
+        /* Error list */
+        .errors-container {
+          flex: 1;
+          overflow-y: auto;
+          padding: 0 16px 12px; /* ✅ Padding réduit */
+        }
+
+        .error-item {
+          display: flex;
+          gap: 10px;
+          padding: 9px 11px;
+          background: rgba(242,78,124,0.07);
+          border: 1px solid rgba(242,78,124,0.18);
+          border-radius: 6px;
+          margin-bottom: 6px;
+          font-family: 'Space Mono', monospace;
+          font-size: 11px;
+        }
+
+        .err-lnum { color: var(--accent2); font-weight: 700; white-space: nowrap; }
+        .err-raw { color: var(--yellow); opacity: 0.85; font-size: 10px; }
+        .err-reason { color: var(--text2); font-size: 10px; margin-top: 2px; line-height: 1.5; }
+
+        /* Export row ✅ PLUS VISIBLE */
+        .export-row {
+          padding: 10px 16px; /* ✅ Réduit */
+          border-top: 1px solid var(--border);
+          display: flex;
+          gap: 7px;
+          min-height: 48px; /* ✅ Hauteur garantie */
+        }
+
+        /* CANVAS */
+        .canvas-area {
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+
+        .canvas-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 22px;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .bar-info {
+          font-family: 'Space Mono', monospace;
+          font-size: 11px;
+          color: var(--text2);
+        }
+
+        .canvas-wrap {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          position: relative;
+        }
+
+        canvas {
+          max-width: 100%;
+          max-height: 100%;
+          border-radius: 8px;
+          box-shadow: 0 0 0 1px var(--border), 0 24px 64px rgba(0,0,0,0.6);
+        }
+
+        .empty-state {
+          text-align: center;
+          position: absolute;
+        }
+
+        .empty-icon {
+          font-size: 56px;
+          opacity: 0.15;
+          display: block;
+          margin-bottom: 14px;
+          animation: breathe 4s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+          0%, 100% { opacity: 0.1; transform: scale(1); }
+          50% { opacity: 0.25; transform: scale(1.06); }
+        }
+
+        .empty-title { font-size: 16px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+        .empty-sub { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text2); opacity: 0.5; }
+
+        /* Spinner */
+        .spinner {
+          display: none;
+          position: absolute;
+          width: 36px;
+          height: 36px;
+          border: 3px solid var(--border);
+          border-top-color: var(--accent);
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Toast */
+        .toast {
+          position: fixed;
+          bottom: 22px;
+          right: 22px;
+          background: var(--surface2);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 12px 16px;
+          font-size: 13px;
+          font-weight: 600;
+          z-index: 200;
+          transform: translateY(60px);
+          opacity: 0;
+          transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.ok { border-color: rgba(74,222,128,0.35); }
+        .toast.err { border-color: rgba(242,78,124,0.35); }
+
+        /* Server warning */
+        .server-banner {
+          background: rgba(124,106,247,0.08);
+          border-bottom: 1px solid rgba(124,106,247,0.2);
+          padding: 10px 36px;
+          font-family: 'Space Mono', monospace;
+          font-size: 11px;
+          color: var(--text2);
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .server-status { width: 8px; height: 8px; border-radius: 50%; background: var(--text2); flex-shrink: 0; }
+        .server-status.online { background: var(--green); box-shadow: 0 0 6px rgba(74,222,128,0.5); }
+        .server-status.offline { background: var(--accent2); animation: blink 1s step-end infinite; }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <span class="logo-name">Voronoï</span>
+        <span class="logo-lang">Python 3</span>
+    </div>
+    <span class="logo-sub">BUT Informatique · Architecture SOLID · TDD</span>
+</header>
+
+<div class="server-banner">
+    <div class="server-status" id="serverStatus"></div>
+    <span id="serverMsg">Connexion au serveur Python…</span>
+</div>
+
+<main>
+    <aside class="panel">
+        <div class="panel-block">
+            <div class="block-title">Source de points</div>
+
+            <div class="dropzone" id="dropzone">
+                <span class="dropzone-icon">📂</span>
+                <span class="dropzone-text">Déposer un fichier .txt</span>
+                <span class="dropzone-hint">cliquer pour parcourir</span>
+                <input type="file" id="fileInput" accept=".txt,text/plain" />
+            </div>
+
+            <div class="divider">ou saisie manuelle</div>
+
+            <textarea
+                    id="rawInput"
+                    placeholder="0,0&#10;100,0&#10;50,86.6&#10;5.3,4.5&#10;-10,20"
+                    spellcheck="false"
+            ></textarea>
+
+            <div class="hint-text">
+                Format : <code>x,y</code> — entiers ou décimaux, un par ligne<br/>
+                Ex : <code>2,4</code> · <code>5.3,4.5</code> · <code>-1,0</code>
+            </div>
+
+            <button class="btn-primary" id="generateBtn">⬡ Générer le diagramme</button>
+        </div>
+
+        <div class="panel-block">
+            <div class="block-title">Statistiques</div>
+            <div class="stats-row">
+                <div class="stat">
+                    <div class="stat-val a" id="statPoints">—</div>
+                    <div class="stat-lbl">Points valides</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-val g" id="statEdges">—</div>
+                    <div class="stat-lbl">Arêtes</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-val" id="statCells">—</div>
+                    <div class="stat-lbl">Cellules</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-val r" id="statErrors">—</div>
+                    <div class="stat-lbl">Erreurs</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="block-title" style="padding: 14px 16px 0; font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.14em; color:var(--text2); text-transform:uppercase; display:flex; align-items:center; gap:8px;">
+            Erreurs de format
+            <span style="flex:1;height:1px;background:var(--border);display:block;"></span>
+        </div>
+        <div class="errors-container" id="errorList"></div>
+
+        <div class="export-row">
+            <button class="btn-sm" id="exportSvgBtn" disabled>⬡ SVG</button>
+            <button class="btn-sm" id="exportPngBtn" disabled>🖼 PNG</button>
+            <button class="btn-sm" id="demoBtn" style="margin-left:auto;">✦ Démo</button>
+        </div>
+    </aside>
+
+    <section class="canvas-area">
+        <div class="canvas-bar">
+            <span class="bar-info" id="barInfo">En attente…</span>
+        </div>
+        <div class="canvas-wrap" id="canvasWrap">
+            <div class="spinner" id="spinner"></div>
+            <div class="empty-state" id="emptyState">
+                <span class="empty-icon">⬡</span>
+                <div class="empty-title">Aucun diagramme généré</div>
+                <div class="empty-sub">Importez un fichier ou saisissez des coordonnées</div>
+            </div>
+            <canvas id="canvas" style="display:none;"></canvas>
+        </div>
+    </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const API = 'http://localhost:8765';
+
+    // ── State ──────────────────────────────────────────────────
+    let currentDiagramData = null;
+    let currentRawText = '';
+
+    // ── DOM refs ───────────────────────────────────────────────
+    const el = {
+      dropzone: document.getElementById('dropzone'),
+      fileInput: document.getElementById('fileInput'),
+      rawInput: document.getElementById('rawInput'),
+      generateBtn: document.getElementById('generateBtn'),
+      demoBtn: document.getElementById('demoBtn'),
+      canvas: document.getElementById('canvas'),
+      canvasWrap: document.getElementById('canvasWrap'),
+      emptyState: document.getElementById('emptyState'),
+      spinner: document.getElementById('spinner'),
+      errorList: document.getElementById('errorList'),
+      exportSvgBtn: document.getElementById('exportSvgBtn'),
+      exportPngBtn: document.getElementById('exportPngBtn'),
+      barInfo: document.getElementById('barInfo'),
+      statPoints: document.getElementById('statPoints'),
+      statEdges: document.getElementById('statEdges'),
+      statCells: document.getElementById('statCells'),
+      statErrors: document.getElementById('statErrors'),
+      serverStatus: document.getElementById('serverStatus'),
+      serverMsg: document.getElementById('serverMsg'),
+      toast: document.getElementById('toast'),
+    };
+
+    // ── Server check ───────────────────────────────────────────
+    async function checkServerConnection() {
+      try {
+        const res = await fetch(`${API}/`, { method: 'GET', signal: AbortSignal.timeout(2000) });
+        if (res.ok) {
+          el.serverStatus.className = 'server-status online';
+          el.serverMsg.textContent = `Serveur Python connecté → ${API}`;
+          return true;
+        }
+      } catch {
+        el.serverStatus.className = 'server-status offline';
+        el.serverMsg.textContent = `Serveur hors ligne — lancez : python main.py`;
+      }
+      return false;
+    }
+
+    // ── Toast ──────────────────────────────────────────────────
+    let toastTimer = null;
+
+    function showToast(msg, type = 'ok') {
+      clearTimeout(toastTimer);
+      el.toast.textContent = (type === 'ok' ? '✓  ' : '✕  ') + msg;
+      el.toast.className = `toast show ${type}`;
+      toastTimer = setTimeout(() => el.toast.className = 'toast', 3000);
+    }
+
+    // ── Stats update ───────────────────────────────────────────
+    function updateStats(diagram, errorCount) {
+      el.statPoints.textContent = diagram.sites.length;
+      el.statEdges.textContent = diagram.edges.length;
+      el.statCells.textContent = diagram.sites.length;
+      el.statErrors.textContent = errorCount;
+    }
+
+    // ── Error list ─────────────────────────────────────────────
+    function renderErrors(errors) {
+      el.errorList.innerHTML = '';
+      errors.forEach(err => {
+        const item = document.createElement('div');
+        item.className = 'error-item';
+        item.innerHTML = `
+          <span class="err-lnum">L.${err.lineNumber}</span>
+          <div>
+            <div class="err-raw">"${err.rawContent}"</div>
+            <div class="err-reason">${err.reason}</div>
+          </div>`;
+        el.errorList.appendChild(item);
+      });
+    }
+
+    // ── Canvas rendering ───────────────────────────────────────
+    const PALETTE = ['#7c6af7','#f24e7c','#4ade80','#facc15','#f87171','#38bdf8','#c084fc','#fb923c','#34d399','#a3e635'];
+
+    function resizeCanvas() {
+      const rect = el.canvasWrap.getBoundingClientRect();
+      el.canvas.width = Math.min(rect.width - 40, 1000);
+      el.canvas.height = Math.round(el.canvas.width * 0.65);
+    }
+
+    function worldToCanvas(wx, wy, bb, w, h) {
+      return {
+        cx: ((wx - bb.minX) / (bb.maxX - bb.minX)) * w,
+        cy: ((wy - bb.minY) / (bb.maxY - bb.minY)) * h,
+      };
+    }
+
+    function renderDiagram(diagram) {
+      const ctx = el.canvas.getContext('2d');
+      const w = el.canvas.width;
+      const h = el.canvas.height;
+      const bb = diagram.boundingBox;
+
+      const bg = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w,h));
+      bg.addColorStop(0, '#12131a');
+      bg.addColorStop(1, '#08090d');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(124,106,247,0.45)';
+      ctx.lineWidth = 1;
+      ctx.shadowColor = 'rgba(124,106,247,0.5)';
+      ctx.shadowBlur = 5;
+      diagram.edges.forEach(e => {
+        const s = worldToCanvas(e.x1, e.y1, bb, w, h);
+        const t = worldToCanvas(e.x2, e.y2, bb, w, h);
+        ctx.beginPath();
+        ctx.moveTo(s.cx, s.cy);
+        ctx.lineTo(t.cx, t.cy);
+        ctx.stroke();
+      });
+      ctx.restore();
+
+      diagram.sites.forEach((site, i) => {
+        const { cx, cy } = worldToCanvas(site.x, site.y, bb, w, h);
+        const color = PALETTE[i % PALETTE.length];
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, 16, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.15;
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.save();
+        const label = `(${site.x}, ${site.y})`;
+        ctx.font = '10px "Space Mono", monospace';
+        const mw = ctx.measureText(label).width;
+        ctx.fillStyle = 'rgba(8,9,13,0.7)';
+        ctx.fillRect(cx + 8, cy - 19, mw + 6, 15);
+        ctx.fillStyle = 'rgba(228,228,237,0.9)';
+        ctx.fillText(label, cx + 11, cy - 7);
+        ctx.restore();
+      });
+    }
+
+    // ── Generate ───────────────────────────────────────────────
+    async function generateDiagram(text) {
+      if (!text.trim()) { showToast('Aucun texte à analyser', 'err'); return; }
+
+      el.spinner.style.display = 'block';
+      el.emptyState.style.display = 'none';
+      el.canvas.style.display = 'none';
+      el.generateBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${API}/api/compute`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+
+        const { diagram, errors } = await res.json();
+        currentDiagramData = diagram;
+        currentRawText = text;
+
+        renderErrors(errors);
+
+        if (diagram.sites.length === 0) {
+          el.emptyState.style.display = 'block';
+          updateStats(diagram, errors.length);
+          if (errors.length > 0) showToast(`${errors.length} erreur(s) — aucun point valide`, 'err');
+        } else {
+          resizeCanvas();
+          renderDiagram(diagram);
+          el.canvas.style.display = 'block';
+          el.exportSvgBtn.disabled = false;
+          el.exportPngBtn.disabled = false;
+          updateStats(diagram, errors.length);
+          const extra = errors.length > 0 ? ` · ${errors.length} ignorée(s)` : '';
+          el.barInfo.textContent = `${diagram.sites.length} points · ${diagram.edges.length} arêtes${extra}`;
+          showToast(errors.length > 0 ? `Généré avec ${errors.length} erreur(s)` : `Diagramme généré — ${diagram.sites.length} points`, errors.length > 0 ? 'err' : 'ok');
+        }
+      } catch (error) {
+        showToast(`Erreur : ${error.message}`, 'err');
+        el.emptyState.style.display = 'block';
+      } finally {
+        el.spinner.style.display = 'none';
+        el.generateBtn.disabled = false;
+      }
+    }
+
+    // ── SVG export via Python server ───────────────────────────
+    async function exportSvg() {
+      if (!currentRawText) return;
+      try {
+        const res = await fetch(`${API}/api/export/svg`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: currentRawText, width: 1200, height: 900 }),
+        });
+        const svgContent = await res.text();
+        downloadBlob(new Blob([svgContent], { type: 'image/svg+xml' }), 'voronoi.svg');
+        showToast('SVG exporté');
+      } catch (e) {
+        showToast('Erreur export SVG', 'err');
+      }
+    }
+
+    // ── PNG export (canvas) ────────────────────────────────────
+    function exportPng() {
+      el.canvas.toBlob(blob => {
+        downloadBlob(blob, 'voronoi.png');
+        showToast('PNG exporté');
+      });
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // ── Events ─────────────────────────────────────────────────
+    el.generateBtn.addEventListener('click', () => generateDiagram(el.rawInput.value));
+    el.rawInput.addEventListener('keydown', e => { if (e.ctrlKey && e.key === 'Enter') generateDiagram(el.rawInput.value); });
+    el.exportSvgBtn.addEventListener('click', exportSvg);
+    el.exportPngBtn.addEventListener('click', exportPng);
+
+    el.dropzone.addEventListener('click', () => el.fileInput.click());
+    el.dropzone.addEventListener('dragover', e => { e.preventDefault(); el.dropzone.classList.add('active'); });
+    el.dropzone.addEventListener('dragleave', () => el.dropzone.classList.remove('active'));
+    el.dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      el.dropzone.classList.remove('active');
+      const file = e.dataTransfer.files[0];
+      if (file) loadFile(file);
+    });
+    el.fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+
+    function loadFile(file) {
+      const reader = new FileReader();
+      reader.onload = ev => { el.rawInput.value = ev.target.result; showToast(`"${file.name}" chargé`); };
+      reader.onerror = () => showToast('Erreur lecture fichier', 'err');
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    el.demoBtn.addEventListener('click', () => {
+      const demo = ['50,50','200,80','350,60','480,200','420,380','270,450','100,400','30,250','310,220','160,160','440,100','90,120'].join('\n');
+      el.rawInput.value = demo;
+      generateDiagram(demo);
+    });
+
+    window.addEventListener('resize', () => {
+      if (currentDiagramData && el.canvas.style.display !== 'none') {
+        resizeCanvas();
+        renderDiagram(currentDiagramData);
+      }
+    });
+
+    // ── Init ───────────────────────────────────────────────────
+    checkServerConnection();
+    setInterval(checkServerConnection, 10000);
+</script>
+</body>
+</html>
