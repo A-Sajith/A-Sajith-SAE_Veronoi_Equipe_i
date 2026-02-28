@@ -1,0 +1,22 @@
+# Fichier de test d'erreurs (chaque ligne illustre un cas)
+
+# 1) OK
+0,0
+
+# 2) Erreur: format (pas de virgule)
+12
+
+# 3) Erreur: séparateur incorrect
+1;2
+
+# 4) Erreur: non numérique
+1,abc
+
+# 5) Erreur: trop de valeurs
+1,2,3
+
+# 6) Erreur: infini (float non fini)
+1e309,0
+
+# 7) Erreur: trop grand (|coord| > 1e9)
+10000000000,0
