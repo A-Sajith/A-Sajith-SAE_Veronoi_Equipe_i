@@ -1,6 +1,5 @@
 from numpy import sqrt
 import pygame
-import random
 from pygame.math import Vector2
 
 import json
