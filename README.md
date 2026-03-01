@@ -13,6 +13,7 @@ Application permettant de générer un **diagramme de Voronoï** à partir d’u
   - `ClaudeAI/Voronoi/` — Application web via serveur HTTP (stdlib uniquement)
   - `IA_Chatgpt5.2/` — Application desktop (Python + Qt/PySide6) packagée en module
   - `Perplexity/` — Application desktop (Tkinter)
+  - deepseek
 - `phase3_individuel/` — Analyses individuelles des risques liés à l’usage d’IAs génératrices
 
 ## Format des fichiers de points (consigne)
