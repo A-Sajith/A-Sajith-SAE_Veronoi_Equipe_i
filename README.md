@@ -13,7 +13,7 @@ Application permettant de générer un **diagramme de Voronoï** à partir d’u
   - `ClaudeAI/Voronoi/` — Application web via serveur HTTP (stdlib uniquement)
   - `IA_Chatgpt5.2/` — Application desktop (Python + Qt/PySide6) packagée en module
   - `Perplexity/` — Application desktop (Tkinter)
-  - deepseek
+  - `deepseek/` — Application desktop (Matplotlib + SciPy) 
 - `phase3_individuel/` — Analyses individuelles des risques liés à l’usage d’IAs génératrices
 
 ## Format des fichiers de points (consigne)
@@ -60,7 +60,7 @@ Dépendances (à installer dans un environnement Python) : `pygame`, `numpy`.
 
 > Consigne : utiliser au moins **4** IAs génératrices et conserver les prompts + mesurer le temps de corrections.
 >
-> Dans ce dépôt, 3 implémentations IA sont présentes (ClaudeAI, ChatGPT5.2, Perplexity). 
+> Dans ce dépôt, 4 implémentations IA sont présentes (ClaudeAI, ChatGPT5.2, Perplexity, Deepseek). 
 
 ## 1) ClaudeAI — Serveur HTTP + UI web (stdlib uniquement)
 
@@ -129,6 +129,24 @@ Tests :
 ```bash
 pytest
 ```
+
+## 4) Deepseek — Application desktop (Matplotlib + SciPy)
+
+Emplacement : `phase2/deepseek/`
+
+Installation :
+
+```bash
+python -m pip install -r requirements
+```
+
+Lancer :
+
+```bash
+python app.py
+```
+
+Notes : la documentation d’utilisation et l’état actuel du code sont décrits dans `phase2/deepseek/README.md`.
 
 ---
 
