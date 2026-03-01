@@ -145,6 +145,11 @@ Lancer :
 ```bash
 python app.py
 ```
+Tests : 
+
+```bash
+python -m unittest discover -s deepseek/tests
+```
 
 Notes : la documentation d’utilisation et l’état actuel du code sont décrits dans `phase2/deepseek/README.md`.
 
