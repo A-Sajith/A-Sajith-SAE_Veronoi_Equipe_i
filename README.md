@@ -56,7 +56,7 @@ Dépendances (à installer dans un environnement Python) : `pygame`, `numpy`.
 
 ---
 
-# Phase 2 — Implémentations générées avec IAs (au moins 4 requis par la consigne)
+# Phase 2 — Implémentations générées avec 4 IAs
 
 > Consigne : utiliser au moins **4** IAs génératrices et conserver les prompts + mesurer le temps de corrections.
 >
