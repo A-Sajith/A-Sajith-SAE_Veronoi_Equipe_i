@@ -25,3 +25,7 @@ Prérequis
 
 * Python 3.x installé
 * Les bibliothèques nécessaires installées (si besoin : pip install -r requirements.txt)
+
+### Image du rendus finale du diagramme de Veronoï : 
+
+![Texte alternatif](phase1/veronoi.png)
