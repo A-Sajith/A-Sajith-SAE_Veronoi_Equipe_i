@@ -23,7 +23,6 @@ class Germ:
         pygame.draw.circle(surface, self.color, (self.x_screen, self.y_screen), 2)
 
 
-pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 with open('pointplan.json', 'r') as f:        
