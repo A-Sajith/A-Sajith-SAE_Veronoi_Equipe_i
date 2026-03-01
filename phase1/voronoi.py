@@ -23,9 +23,11 @@ class Germ:
         pygame.draw.circle(surface, self.color, (self.x_screen, self.y_screen), 2)
 
 
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-with open('phase1/pointplan.json', 'r') as f:
-        points = json.load(f)
+with open('pointplan.json', 'r') as f:        
+    points = json.load(f)
 
 if __name__ == "__main__":
     pygame.init()
@@ -66,6 +68,7 @@ while running:
         for germe in liste_germes:
             germe.draw(screen)
         pygame.display.flip()
-
+        pygame.image.save(screen, "voronoi.png")
+        
 pygame.quit()
 
