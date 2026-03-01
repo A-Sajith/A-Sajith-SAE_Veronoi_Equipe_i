@@ -1,6 +1,6 @@
 # SAÉ S6 — Diagrammes de Voronoï
 
-Application permettant de générer un **diagramme de Voronoï** à partir d’une liste de points du plan, de le visualiser, et (selon les versions) d’exporter le rendu en **SVG** et/ou **image**.
+Application permettant de générer un **diagramme de Voronoï** à partir d’une liste de points du plan, de le visualiser, et d’exporter le rendu en **SVG** et/ou **image**.
 
 ## Structure du dépôt
 
@@ -131,9 +131,9 @@ pytest
 
 Emplacement : `phase3_individuel/`
 Les 6 themes choisis sont :
-environnement réalisé par Lucas Ferard
+environnement 
 coût économique, souveraineté et géopolitique
-légalité et responsabilité réalisé par Rania Bousfiha
+légalité et responsabilité 
 conséquences sur les personnes travaillant avec l'IA
 qualité du logiciel et de la maintenance
 réputation et appropriation du produit par le public
