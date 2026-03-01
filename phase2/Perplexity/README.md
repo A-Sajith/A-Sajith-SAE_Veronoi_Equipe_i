@@ -102,3 +102,6 @@ phase2/Perplexity/
   - **1 point** → 1 cellule sans arêtes
   - **2 points** → bissectrice (représentée par 2 segments)
 - Si SciPy échoue, un **fallback** simple génère des segments approximatifs.
+
+## Lien du prompt
+https://www.perplexity.ai/search/je-suis-etudiante-en-3e-annee-KjaMUmFyR82LVzyqtXeZmw?sm=d
