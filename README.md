@@ -1,4 +1,6 @@
 # SAÉ S6 — Diagrammes de Voronoï
+## Aperçu du résultat — Phase 1
+
 
 Application permettant de générer un **diagramme de Voronoï** à partir d’une liste de points du plan, de le visualiser, et d’exporter le rendu en **SVG** et/ou **image**.
 
