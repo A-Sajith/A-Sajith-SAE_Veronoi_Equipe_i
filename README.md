@@ -144,5 +144,5 @@ réputation et appropriation du produit par le public
 - Royston Gnanapragasam
 - Sajith Abdoul
 - Lucas Ferard
--
--
+- Ciffedinne Mahdjoub 
+- Ryan Agin
