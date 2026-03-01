@@ -28,4 +28,6 @@ Prérequis
 
 ### Image du rendus finale du diagramme de Veronoï : 
 
-![Texte alternatif](phase1/veronoi.png)
+<p align="center">
+  <img src="SAE_Veronoi_Equipe_i/phase1/veronoi.png" width="300">
+</p>
