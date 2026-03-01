@@ -1,17 +1,18 @@
 # Voronoï — Deepseek (GUI + SciPy)
 
-Ce dossier contient un lanceur d’application graphique qui :
-- lit/importe un fichier de points ;
+Ce dossier contient une application graphique (Tkinter) qui :
+- importe un fichier de points ;
 - calcule un diagramme de Voronoï via **SciPy** ;
 - affiche le résultat avec **Matplotlib** ;
-- permet l’export du diagramme (via un exporter Matplotlib).
+- exporte le diagramme (SVG / image) via Matplotlib.
 
-> Remarque : dans l’état actuel du dépôt, seuls `app.py` et le fichier de dépendances sont présents dans ce dossier. Le lanceur importe des modules `deepseek.*` (GUI, parser, algo, export) qui doivent exister dans le projet pour que l’application démarre.
+Le code est organisé en package Python `deepseek/` (GUI, parsing, algo, export, modèle) + tests.
 
 ## Prérequis
 
 - Python 3.10+ (recommandé)
-- Dépendances Python (voir `requirements`) :
+- Tkinter (inclus avec la plupart des installations Python sous Windows)
+- Dépendances Python (voir `requirements.txt`) :
   - `numpy`
   - `scipy`
   - `matplotlib`
@@ -21,34 +22,49 @@ Ce dossier contient un lanceur d’application graphique qui :
 Depuis `phase2/deepseek/` :
 
 ```bash
-python -m pip install -r requirements
+python -m pip install -r requirements.txt
 ```
 
 ## Lancer l’application
 
-Depuis `phase2/deepseek/` :
+Option A — depuis `phase2/deepseek/` :
 
 ```bash
 python app.py
+```
+
+Option B — depuis `phase2/` (exécution en module) :
+
+```bash
+python -m deepseek.app
+```
+
+> Si tu exécutes depuis un autre dossier, assure-toi que `phase2/` est dans le `PYTHONPATH`.
+
+## Lancer les tests
+
+Les tests sont écrits avec `unittest` (pas besoin de dépendance supplémentaire).
+
+Depuis `phase2/` :
+
+```bash
+python -m unittest discover -s deepseek/tests
 ```
 
 ## Dépannage
 
 ### `ModuleNotFoundError: No module named 'deepseek'`
 
-Le fichier `app.py` fait :
-- un ajout de `phase2/` au `sys.path` ;
-- puis des imports `from deepseek....`.
+Ça arrive si tu lances l’application / les tests depuis un répertoire où `phase2/` n’est pas dans le chemin des imports.
 
-Pour que ça fonctionne, il faut que le package Python `deepseek` (avec ses sous-dossiers `gui/`, `io/`, `algorithm/`, etc.) soit présent dans le workspace, typiquement sous :
-- `phase2/deepseek/` (en tant que package), ou
-- `phase2/deepseek/` (en tant que namespace package) avec les sous-modules.
-
-Si ces fichiers ne sont pas dans le dépôt, il faut les ajouter/coller avant d’exécuter `python app.py`.
+Solutions simples :
+- Lancer l’app depuis `phase2/deepseek/` avec `python app.py` (le script ajoute automatiquement `phase2/` au `sys.path`).
+- Ou lancer depuis `phase2/` avec `python -m deepseek.app`.
+- Pour les tests, rester dans `phase2/` et utiliser la commande `unittest` ci-dessus.
 
 ## Format de fichier de points
 
-Le parseur utilisé s’appelle `SimplePointParser` ; le format attendu est  un fichier texte avec **une paire de coordonnées par ligne**, par exemple :
+Le parseur utilisé s’appelle `SimplePointParser` ; le format attendu est un fichier texte avec **une paire de coordonnées par ligne**, séparées par une virgule :
 
 ```txt
 2,4
@@ -56,6 +72,8 @@ Le parseur utilisé s’appelle `SimplePointParser` ; le format attendu est  un 
 -10,20.5
 0,0
 ```
+
+
 
 
 
