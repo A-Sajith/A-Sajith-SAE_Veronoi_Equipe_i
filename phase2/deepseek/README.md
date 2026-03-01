@@ -32,16 +32,6 @@ Depuis `phase2/deepseek/` :
 python app.py
 ```
 
-## Lancer les tests
-
-Les tests fournis ici sont des **tests structuraux** (ils vérifient la structure de `app.py` et la cohérence des dépendances), afin de rester exécutables même si les modules `deepseek.*` importés par `app.py` ne sont pas encore présents dans le dépôt.
-
-Depuis `phase2/deepseek/` :
-
-```bash
-python -m unittest discover -s tests -p "test_*.py"
-```
-
 ## Dépannage
 
 ### `ModuleNotFoundError: No module named 'deepseek'`
